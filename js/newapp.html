@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="js/jquery.mobile-1.4.2/jquery.mobile-1.4.2.min.css" type="text/css" rel="stylesheet">
+        <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+        <script src="js/jquery.mobile-1.4.2/jquery.mobile-1.4.2.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyBKN_QbuuqENKBxjanKrOGXMym1hI5Z2nw"></script>
+        <script>
+        
+        function getBeerData(info){
+            // api Key for BreweryDB and url to the api
+            var apiKey = "73586eb806d788e046d6c0918ec9f74e";
+            var wsUrl = "http://api.brewerydb.com/v2/?key=";
+            wsUrl = wsUrl + apiKey;
+
+            // Test it
+            console.log(wsUrl);
+        }
+        </script>
+    </head>
+    <body>
+        <section id="Beers" data-role="page">
+            <div data-role="header">
+                <h1></h1>
+            </div>
+            <div class="ui-content" role="main">
+                
+        <div id="weather">
+        </div>
+        <!-- change this to scale. -->
+        <div id="googleMap" style="width:500px;height:380px;"></div>
+            <p></p>
+
+                </div>
+                <div data-role="footer">
+                    <h2>Copyright 2016 INFSCI 1073</h2>
+                </div>
+            </section>
+
+            <!-- This is the second page (in this example it is 5-day weather forecast) -->
+            <section id="fivedayforecast" data-role="page">
+                <div data-role="header">
+                    <h1>5-Day Weather Forecast</h1>
+                </div>
+                <div class="ui-content" role="main">
+                    <p>
+                        5-day weather forecast data will go here...<br />
+                        This is completely different from the first page you visited.<br />
+                        Really!
+                    </p>
+                    <p><a href="#todayforecast">View today's forecast</a></p>
+                </div>
+                <div data-role="footer">
+                    <h2>Copyright 2016 INFSCI 1073</h2>
+                </div>
+            </section>
+            <!-- This is the second page (in this example it is 5-day weather forecast) -->
+            <section id="tendayforecast" data-role="page">
+                <div data-role="header">
+                    <h1>10-Day Weather Forecast</h1>
+                </div>
+                <div class="ui-content" role="main">
+                    <p>
+                        10-day weather forecast data will go here...<br />
+                        This is completely different from the first page you visited.<br />
+                        Really!
+                    </p>
+                    <p><a href="#todayforecast">View today's forecast</a></p>
+                </div>
+                <div data-role="footer">
+                    <h2>Copyright 2016 INFSCI 1073</h2>
+                </div>
+            </section>
+    </body>
+</html>

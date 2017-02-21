@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1,
+                                       width=device-width, height=device-height" />
+        <link rel="stylesheet" href="css/themes/Beer.min.css" />
+        <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+        <script src="js/jquery.mobile-1.4.2/jquery.mobile-1.4.2.min.js"></script>
+        
+        <script>
+        
+        // Do this when document is ready:
+        $(document).ready(function() {
+            
+            // Get the arrest details of the team inputted when the button is clicked.
+            $("#btnGetArrests").on("click", function() {
+                
+                // Clear the results for each query.
+                $("#teams").children().remove();
+
+                //Get the value inputted and store it in arrestQuery.
+                var arrestQuery = $("#team").val();
+                
+                
+                //Make sure that the user inputted something in.
+                if (arrestQuery != ""){
+                    //call the function getTeamArrestData to get data
+                   getTeamArrestData(arrestQuery);
+
+
+                } else {
+
+                   alert("Enter a valid team!");
+                }
+
+            });
+            
+            // After we move away from the nflTeam page, it removes the data in teams div.
+            $("#nflTeam").on("pagehide", function(event, ui){
+                
+                 $("#teams").children().remove();
+            });
+                
+               // Pageinit is the event fired when the page is initialized
+                // This function will be run when the topPlayer page is initialized.
+               $("#topPlayer").on("pageinit", function(event, ui) {
+                    
+                   //Call getTopPlayer to get the player with most arrests
+                    getTopPlayer();
+
+                });
+            
+                //This function will be run when the searchPlayer page is shown
+                $("#searchPlayer").on("pageshow", function(event, ui) {
+                    
+                    // Button event handler for Player Arrests
+                    $("#btnPlayerArrests").on("click", function() {
+                        
+                        $("#playerArrests").children().remove();
+                        
+                        var player = $("#playerName").val();
+                        
+                        
+                        if (player != ""){
+                            
+                            // Call getPlayerArrests with the player inputted by user.
+                            getPlayerArrests(player);
+                            
+                        } else {
+                            alert("Please enter a valid name.");
+                        }
+                    })
+                    
+                    
+                });
+        
+           
+        }); //end of document ready function
+        
+     
+      
+        // This function gets the arrest details for the team
+        function getTeamArrestData(info){
+            
+            // The api url
+            var nflUrl = "http://nflarrest.com/api/v1/";
+            // end point
+            var term = "team/search/?term=" + encodeURIComponent(info);
+            nflUrl = nflUrl + term;
+            
+            //Get the json object using the nflUrl
+            $.get(nflUrl, function(data){
+                
+                //test
+                
+                
+                // Get the team_code's value and store it in team.
+               var team = data[0].team_code; 
+                
+                // Use the team_code's value from above to get the arrest details
+                var nflUrl = "http://nflarrest.com/api/v1/";
+                nflUrl = nflUrl + "team/arrests/" + team +"?limit=10";
+
+                // Get new json objects from the api
+                $.get(nflUrl, function(data){
+                   
+                    // Loop through all the objects and get the necessary info
+                    for(var i=0; i< data.length; i++){
+                         
+                        var cat = data[i].Category;
+                        var date = data[i].Date;
+                        var des = data[i].Description;
+                        var name = data[i].Name;
+                        var outcome = data[i].Outcome;
+                        
+                        // Create new div to append to the teams div on main page.
+                        var incident;
+                        incident = document.createElement("div");
+                        incident.setAttribute("id", "incident-"+i);
+                        
+                        
+
+                        
+                       
+                        $("#teams").append(incident);
+                        
+                        // Append the data from object to the incident div.
+                        $("#incident-"+i).append("<br>Category: " + cat + "<br>");
+                        $("#incident-"+i).append("Date: " + date + "<br>");
+                        $("#incident-"+i).append("Description: " + des + "<br>");
+                        $("#incident-"+i).append("Name: " + name + "<br>");
+                        $("#incident-"+i).append("Outcome: " + outcome + "<br><br>");
+                     
+                    }
+                    
+                });
+
+            });
+           
+        } //end of getTeamArrestData function
+        
+        // This function gets the top player, player with the most arrests
+        function getTopPlayer() {
+            
+            
+            var nflUrl = "http://nflArrest.com/api/v1/player/?limit=1";
+            
+            $.get(nflUrl, function(data){
+                
+                
+                
+                $("#player > p").append("Name: "+ data[0].Name+"<br>");
+                $("#player > p").append("Team: " + data[0].Team_name+"<br>");
+                $("#player > p").append("City: "+ data[0].Team_city+"<br>");
+                $("#player > p").append("Position: "+ data[0].Position+"<br>");
+                $("#player > p").append("Arrest Count: "+ data[0].arrest_count+"<br>");
+                
+            });
+            
+        }// end of getTopPlayer
+        
+            
+        function getPlayerArrests(info) {
+            
+            //api url and endpoint for specific player info
+            var nflUrl = "http://nflarrest.com/api/v1/player/search/?term="
+            nflUrl = nflUrl + encodeURIComponent(info) +"&limit=1";
+            
+            
+            $.get(nflUrl, function(data){
+                
+                //If nothing is returned, then they weren't arrested.
+                if(data.length == 0) {
+                    
+                    
+                    var noRes = "<p>No results found.</p>";
+                    //Pring out that no results found
+                    $("#playerArrests").append(noRes);
+                
+                //Otherwise loop through all the incidents and retreive info
+                } else {
+
+                    for(var i=0; i < data.length; i++) {
+                        
+                        //Create new element player that will be a collapsible div
+                        var player;
+                        player = document.createElement("div");
+                        player.setAttribute("id", "player-"+i);
+                        player.setAttribute("data-role", "collapsible");
+                        
+                        
+                        // Header for the player div
+                        var header;
+                        header = document.createElement("h1");
+                        header.innerHTML=data[i].Name;
+                        player.appendChild(header);
+                        
+                        //New api endpoint that gets the player arrest details
+                        nflUrl = "http://nflarrest.com/api/v1/player/arrests/" + data[i].Name;
+                        
+                        //Create contents, p element that will be appended to player div.
+                        var contents;
+                        contents = document.createElement("p");
+                        
+                        
+                        // Get the objects 
+                        $.get(nflUrl, function(playerData){
+
+                            
+                            for(var j=0; j<playerData.length; j++){
+
+                                var date = playerData[j].Date;
+                                var team = playerData[j].Team_name;
+                                var cat = playerData[j].Category;
+                                var des = playerData[j].Description;
+                                
+                                //Add all the revelant info into the contents
+                                contents.innerHTML= contents.innerHTML + "Date: "+date+"<br>Team: "+team+ "<br>Category: "+cat+"<br>Description: "+ des+"<br><hr>";
+
+                            }
+
+                        });
+                        
+                        player.appendChild(contents);
+                        
+                        $("#playerArrests").append(player).collapsibleset("refresh");
+
+                    }
+                }
+            });
+        }
+            
+    
+
+        </script>
+    </head>
+    <body>
+        <section id="nflTeam" data-role="page">
+            <!-- Taken this navbar from w3school-->
+            <div data-role="header">
+                <h1>NFL Criminals</h1>
+                <div data-role="navbar">
+                  <ul>
+                    <li><a href="#nflTeam">Home</a></li>
+                    <li><a href="#topPlayer">Top Player</a></li>
+                    <li><a href="#searchPlayer">Search Player</a></li>
+                  </ul>
+            </div>
+            </div>
+            <div class="ui-content" role="main">
+            
+                <label for="team">Team</label>
+                <input type="text" id="team" value="" />
+                <input type="button" id="btnGetArrests" value="Enter Your NFL Team" />
+                
+            <div id="teams">
+                
+            </div>
+            </div>
+            <div data-role="footer">
+                    <h2>Copyright 2017 INFSCI 1073</h2>
+            </div>
+        </section>
+
+            <!-- This is the first page that displays the top player -->
+        <section id="topPlayer" data-role="page">
+                <div data-role="header">
+                <h1>Top Player</h1>
+                <div data-role="navbar">
+                  <ul>
+                    <li><a href="#nflTeam">Home</a></li>
+                    <li><a href="#topPlayer">Top Player</a></li>
+                    <li><a href="#searchPlayer">Search Player</a></li>
+                  </ul>
+                </div>
+                </div>
+                <div class="ui-content" role="main">
+                    
+                    <div id="player">
+                    <h2>The top criminal is...</h2>
+                    <p></p>
+                    </div>
+                    
+                </div>
+                <div data-role="footer">
+                    <h2>Copyright 2017 INFSCI 1073</h2>
+                </div>
+         </section>
+        
+            <!-- This is the second page that will search players -->
+        <section id="searchPlayer" data-role="page">
+                <div data-role="header">
+                <h1>Search Players</h1>
+                <div data-role="navbar">
+                  <ul>
+                    <li><a href="#nflTeam">Home</a></li>
+                    <li><a href="#topPlayer">Top Player</a></li>
+                    <li><a href="#searchPlayer">Search Player</a></li>
+                  </ul>
+                </div>
+            </div>
+                <div class="ui-content" role="main">
+                    
+                    <p>
+                        <label for="playerName">Player's Name</label>
+                        <input type="text" id="playerName" value="" />
+                        <input type="button" id="btnPlayerArrests" value="Enter a player's full name" />
+                        
+                    </p>
+                    
+                
+                    <div id="playerArrests" data-role="collapsibleset">
+                
+                    </div>
+            </div>
+                <div data-role="footer">
+                    <h2>Copyright 2017 INFSCI 1073</h2>
+                </div>
+        </section>
+    </body>
+</html>
